@@ -1,0 +1,49 @@
+.include "m328Pdef.inc"
+
+.org 0
+jmp Reset
+
+.org 0x002
+jmp Int_0
+
+.org 0x004
+jmp Int_1
+
+Reset:
+    ldi r16, High(RAMEND)
+    out SPH, r16
+    ldi r16, Low(RAMEND)
+    out SPL, r16
+
+    ldi r16, 0x0F
+    sts EICRA, r16          ; INT0 и INT1 по фронту (ISC11:10 = 11, ISC01:00 = 11)
+
+    ldi r16, 0x03
+    out EIMSK, r16          ; Разрешение INT0 и INT1
+
+    ldi r16, 0x03
+    out DDRD, r16           ; PD0 и PD1 — вывод (AT1 и AT2)
+
+    sbi PORTD, 2            ; Подтяжка на PD2 (INT0)
+    sbi PORTD, 3            ; Подтяжка на PD3 (INT1)
+
+    sei                     ; Глобальное разрешение прерываний
+
+main:
+    jmp main             
+
+Int_0:
+    in r16, PORTD           ; Чтение текущего состояния порта D
+    ldi r17, 0x01           ; Маска для бита 0 (AT1)
+    eor r16, r17            ; Инверсия бита 0
+    ori r16, 0xFC           ; Сохранение остальных битов
+    out PORTD, r16          ; Запись обратно в порт D
+    reti                    ; Выход из прерывания
+
+Int_1:
+    in r16, PORTD           ; Чтение текущего состояния порта D
+    ldi r17, 0x02           ; Маска для бита 1 (AT2)
+    eor r16, r17            ; Инверсия бита 1
+    ori r16, 0xFC           ; Сохранение остальных битов
+    out PORTD, r16          ; Запись обратно в порт D
+    reti                    
