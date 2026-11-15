@@ -1,0 +1,18 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+ISR(INT0_vect) {
+    PORTD ^= 0x03;          // Инверсия битов 0 и 1 (RX и TX)
+}
+
+int main(void) {
+    EICRA = 0x03;           // INT0 по фронту
+    EIMSK = 0x01;           // Разрешение INT0
+    DDRD = 0x03;            // PD0 и PD1 — вывод
+    PORTD = 0x05;           // PD0 = 1 (RX горит), PD2 = 1 (подтяжка)
+    sei();                  // Глобальное разрешение прерываний
+
+    while(1) {
+        // Основная программа пуста
+    }
+}
