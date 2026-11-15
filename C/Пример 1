@@ -1,0 +1,23 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+int x;
+
+ISR(INT1_vect) {
+    PORTC = 0x00;           // Сброс порта C при прерывании
+}
+
+int main(void) {
+    x = 0;
+    EICRA = 0x00;           // INT1 по низкому уровню
+    EIMSK = 0x02;           // Разрешение INT1
+    DDRD = 0x00;            // Порт D — вход
+    PORTD = 0x08;           // Подтяжка на PD3 (бит 3)
+    DDRC = 0xFF;            // Порт C — вывод
+    sei();                  // Глобальное разрешение прерываний
+
+    while(1) {
+        PORTC = x;          // Вывод счётчика в порт C
+        x++;                // Инкремент
+    }
+}
