@@ -1,0 +1,43 @@
+.include "m328Pdef.inc"
+
+.org 0
+jmp Reset
+
+.org 0x006
+jmp mPCINT0
+
+.org 0x00A
+jmp mPCINT2
+
+Reset:
+    ldi r16, Low(RAMEND)
+    out SPL, r16
+    ldi r16, High(RAMEND)
+    out SPH, r16
+
+    ldi r16, 0x07
+    sts PCICR, r16        
+
+    ldi r16, 0xFF
+    sts PCMSK0, r16         ; Разрешение прерываний от всех выводов группы 0 (порт B)
+    sts PCMSK2, r16         ; Разрешение прерываний от всех выводов группы 2 (порт D)
+
+    sei                 
+
+m:
+    inc r17                
+    jmp m                  
+
+mPCINT0:
+    in r20, PINB            ; Чтение текущего состояния порта B
+    mov r22, r18            ; Сохранение предыдущего состояния
+    eor r22, r20            ; XOR: маска изменившихся битов
+    mov r18, r20            ; Сохранение текущего состояния
+    reti                  
+
+mPCINT2:
+    in r21, PIND            ; Чтение текущего состояния порта D
+    mov r23, r19            ; Сохранение предыдущего состояния
+    eor r23, r21            ; XOR: маска изменившихся битов
+    mov r19, r21            ; Сохранение текущего состояния
+    reti                   
