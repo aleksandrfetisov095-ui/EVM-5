@@ -1,0 +1,37 @@
+.include "m328Pdef.inc"
+
+.org 0
+jmp Reset
+
+.org 0x004
+jmp Int_1
+
+Reset:
+    ldi r16, High(RAMEND)
+    out SPH, r16
+    ldi r16, Low(RAMEND)
+    out SPL, r16
+
+    ldi r16, 0x00
+    sts EICRA, r16          ; INT1 по низкому уровню (ISC11:ISC10 = 00)
+
+    ldi r16, 0x02
+    out EIMSK, r16          ; Разрешение прерывания INT1
+
+    cbi DDRD, 3             ; PD3 (INT1) — вход
+    sbi PORTD, 3            ; Подтяжка на PD3
+
+    ldi r16, 0xFF
+    out DDRC, r16           ; Порт C — вывод
+
+    sei                     ; Глобальное разрешение прерываний
+
+main:
+    inc r17                 ; Инкремент счётчика
+    out PORTC, r17          ; Вывод в порт C
+    jmp main                ; Бесконечный цикл
+
+Int_1:
+    ldi r17, 0x00           ; Сброс счётчика
+    out PORTC, r17          ; Вывод 0x00 в порт C
+    reti                    ; Выход из прерывания
