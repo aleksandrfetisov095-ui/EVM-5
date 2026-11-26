@@ -1,0 +1,21 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+ISR(USART_RX_vect) {
+    char received = UDR0;
+    if (received == 'A') {
+        PORTB |= (1<<PB5);
+    } else {
+        PORTB &= ~(1<<PB5);
+    }
+}
+
+int main(void) {
+    UBRR0 = 103;
+    UCSR0B = (1<<RXEN0) | (1<<RXCIE0);
+    UCSR0C = (1<<UCSZ01) | (1<<UCSZ00);
+    DDRB |= (1<<PB5);
+    PORTB &= ~(1<<PB5);
+    sei();
+    while(1) { }
+}
