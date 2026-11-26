@@ -1,0 +1,18 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+ISR(INT0_vect) {
+    UDR0 = 0x3E;
+}
+
+int main(void) {
+    EICRA |= 0x03;
+    EIMSK |= 0x01;
+    DDRD &= ~0x04;
+    PORTD |= 0x04;
+    UBRR0 = 103;
+    UCSR0B |= (1<<TXEN0);
+    UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
+    sei();
+    while(1) { }
+}
